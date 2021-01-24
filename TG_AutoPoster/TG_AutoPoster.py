@@ -25,6 +25,7 @@ else:
 CONFIG_PATH = Path.cwd() / "config.ini"
 
 
+
 def create_parser():
     parser = argparse.ArgumentParser(
         prog="TG_AutoPoster",

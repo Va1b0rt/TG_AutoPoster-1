@@ -10,6 +10,7 @@ from vk_api.audio import VkAudio
 from wget import download
 
 from TG_AutoPoster.tools import add_audio_tags, build_menu, start_process
+from TG_AutoPoster.downloader import get_n_save
 
 MAX_FILENAME_LENGTH = 255
 DOMAIN_REGEX = r"https://(m\.)?vk\.com/"
@@ -138,11 +139,13 @@ class VkPostParser:
                 log.error("Ошибка получения аудиозаписей: {0}", error)
             else:
                 for track in tracks:
+                    artist = track["artist"].replace(' ', '_')
+                    title = track["title"].replace(' ', '_')
                     name = (
                         sub(r"[^a-zA-Z '#0-9.а-яА-Я()-]", "", track["artist"] + " - " + track["title"])[
                         : MAX_FILENAME_LENGTH - 16
                         ]
-                        + ".mp3"
+#                        + ".mp3"
                     )
                     if ".m3u8" in track["url"]:
                         log.warning("Файлом аудиозаписи является m3u8 плейлист.")
@@ -161,7 +164,8 @@ class VkPostParser:
                             continue
                     else:
                         try:
-                            file = download(track["url"], out=name)
+                            file = get_n_save(name)
+                            print(file)
                         except (urllib.error.URLError, IndexError):
                             log.exception("[AP] Не удалось скачать аудиозапись. Пропускаем ее...")
                             continue
@@ -175,7 +179,7 @@ class VkPostParser:
                     )
                     if result:
                         log.debug("Track {} ready for sending", name)
-                        self.tracks.append((name, track["duration"], track["artist"], track["title"], track_cover))
+                        self.tracks.append((file, track["duration"], track["artist"], track["title"], track_cover))
 
     def generate_poll(self, attachment):
         self.poll = {

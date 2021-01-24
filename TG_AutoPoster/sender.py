@@ -13,7 +13,7 @@ class PostSender:
         self.text = split(self.post.text)
         self.disable_notification = disable_notification
         self.disable_web_page_preview = disable_web_page_preview
-
+    dbas_link = '\n<a href="https://t.me/dbas_music_bot">🔊Музыка | Новинки </a>'
     @log.catch()
     def send_post(self):
         try:
@@ -45,14 +45,14 @@ class PostSender:
                     self.send_splitted_message(self.bot, self.text, self.chat_id)
                     self.bot.send_message(
                         self.chat_id,
-                        self.text[-1],
-                        disable_web_page_preview=self.disable_web_page_preview,
+                        self.text[-1] +  self.dbas_link ,                            disable_web_page_preview=self.disable_web_page_preview,
                         disable_notification=self.disable_notification,
                     )
                     if isinstance(self.post.media[0], InputMediaPhoto):
                         self.bot.send_photo(
                             self.chat_id,
                             self.post.media[0]["media"],
+                            caption = self.dbas_link ,
                             reply_markup=self.post.reply_markup,
                             disable_notification=self.disable_notification,
                         )
@@ -61,6 +61,7 @@ class PostSender:
                             self.chat_id,
                             self.post.media[0]["media"],
                             reply_markup=self.post.reply_markup,
+                            caption = self.dbas_link ,
                             disable_notification=self.disable_notification,
                         )
                 else:
@@ -68,7 +69,7 @@ class PostSender:
                         self.bot.send_photo(
                             self.chat_id,
                             self.post.media[0]["media"],
-                            caption=self.text[-1],
+                            caption=self.text[-1] + self.dbas_link  ,
                             reply_markup=self.post.reply_markup,
                             disable_notification=self.disable_notification,
                         )
@@ -76,7 +77,7 @@ class PostSender:
                         self.bot.send_video(
                             self.chat_id,
                             self.post.media[0]["media"],
-                            caption=self.text[-1],
+                            caption=self.text[-1] + self.dbas_link  ,
                             reply_markup=self.post.reply_markup,
                             disable_notification=self.disable_notification,
                         )
@@ -86,16 +87,18 @@ class PostSender:
                     self.send_splitted_message(self.bot, self.text, self.chat_id)
                     self.bot.send_message(
                         self.chat_id,
-                        self.text[-1],
+                        self.text[-1] + self.dbas_link ,
                         reply_markup=self.post.reply_markup,
                         disable_web_page_preview=self.disable_web_page_preview,
                         disable_notification=self.disable_notification,
                     )
+                    self.post.media[0]["caption"] = self.dbas_link
                     self.bot.send_media_group(
-                        self.chat_id, self.post.media, disable_notification=self.disable_notification
+                        self.chat_id, self.post.media,
+                        disable_notification=self.disable_notification
                     )
                 else:
-                    self.post.media[0]["caption"] = self.post.text
+                    self.post.media[0]["caption"] = self.post.text + self.dbas_link 
                     self.bot.send_media_group(
                         self.chat_id, self.post.media, disable_notification=self.disable_notification
                     )
@@ -103,7 +106,7 @@ class PostSender:
             self.send_splitted_message(self.bot, self.text, self.chat_id)
             self.bot.send_message(
                 self.chat_id,
-                self.text[-1],
+                self.text[-1] + self.dbas_link  ,
                 reply_markup=self.post.reply_markup,
                 disable_web_page_preview=self.disable_web_page_preview,
                 disable_notification=self.disable_notification,
@@ -119,16 +122,16 @@ class PostSender:
                         self.bot.send_document(
                             self.chat_id,
                             document=doc,
-                            caption=self.text[-1],
+                            caption=self.text[-1] + self.dbas_link  ,
                             reply_markup=self.post.reply_markup,
                             disable_notification=self.disable_notification,
                         )
                     else:
-                        self.send_splitted_message(self.bot, self.text, self.chat_id)
+                        self.send_splitted_message(self.bot, self.text + self.dbas_link  , self.chat_id)
 
                         self.bot.send_message(
                             self.chat_id,
-                            self.text[-1],
+                            self.text[-1] + self.dbas_link  ,
                             reply_markup=self.post.reply_markup,
                             disable_web_page_preview=self.disable_web_page_preview,
                             disable_notification=self.disable_notification,
@@ -152,7 +155,7 @@ class PostSender:
             log.debug("Sending audio {} with duration {} secs", audio, duration)
             self.bot.send_audio(
                 self.chat_id, audio, duration, disable_notification=self.disable_notification,
-                performer=artist, title=title, thumb=cover
+                performer='🗣'+ artist, title=title, thumb=cover, caption = self.dbas_link 
             )
 
     def send_poll(self):
@@ -162,4 +165,4 @@ class PostSender:
     def send_splitted_message(self, bot, text, chat_id):
         log.debug("Sending splitted message")
         for i in range(len(text) - 1):
-            bot.send_message(chat_id, text[i], disable_notification=self.disable_notification)
+            bot.send_message(chat_id, text[i] + self.dbas_link  , disable_notification=self.disable_notification)
