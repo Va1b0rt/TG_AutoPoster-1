@@ -17,13 +17,16 @@ DOMAIN_REGEX = r"https://(m\.)?vk\.com/"
 
 
 class VkPostParser:
-    def __init__(self, post, domain, session, sign_posts=False, what_to_parse=None):
+    def __init__(self, post, domain, session, sign_posts=False, what_to_parse=None, add_link=False, del_hashtags=False):
         self.session = session
         try:
             self.audio_session = VkAudio(session)
         except IndexError:
             self.audio_session = None
+        self.post = post
+        self.add_link = add_link
         self.sign_posts = sign_posts
+        self.del_hashtags = del_hashtags
         self.pattern = "@" + sub(DOMAIN_REGEX, "", domain)
         self.raw_post = post
         self.post_url = "https://vk.com/wall{owner_id}_{id}".format(**self.raw_post)
@@ -71,7 +74,18 @@ class VkPostParser:
             if self.pattern != "@":
                 self.text = sub(self.pattern, "", self.text, flags=IGNORECASE)
             self.text = self.text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            self.text = sub(r"\[(.*?)\|(.*?)\]", r'<a href="https://vk.com/\1">\2</a>', self.text, flags=MULTILINE)
+            self.text = sub(r"\[(.*?)\|(.*?)]", r'<a href="https://vk.com/\1">\2</a>', self.text, flags=MULTILINE)
+            if "attachments" in self.post.keys():
+                for attach in self.post['attachments']:
+                    if attach['type'] == 'audio':
+                        self.text += "\n🗣" + attach['audio']['artist'] + " " + attach['audio']['title']
+                    elif attach['type'] == 'video':
+                        self.text += "\n🗣" + attach['video']['title']
+                self.text += "\n"
+            if self.add_link:
+                self.text += '\n<a href="https://t.me/dbas_music_bot">🔊Музыка | Новинки </a>'
+            if self.del_hashtags:
+                self.text = sub(r'(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)', "", self.text)
 
     def generate_link(self, attachment):
         log.info("[AP] Парсинг ссылки...")
@@ -130,56 +144,35 @@ class VkPostParser:
                 video_link.replace("m.", ""), attachment["video"]
             )
 
+    def get_tracks(self, post):
+        tracks = []
+        for attach in post['attachments']:
+            if attach['type'] == 'audio':
+                tracks.append({'artist': attach['audio']['artist'], 'title': attach['audio']['title']})
+        return tracks
+
     def generate_music(self):
         if "audio" in self.attachments_types:
             log.info("[AP] Извлечение аудио...")
+
             try:
-                tracks = self.audio_session.get_post_audio(self.raw_post["owner_id"], self.raw_post["id"])
+                tracks = self.get_tracks(self.post)
             except Exception as error:
                 log.error("Ошибка получения аудиозаписей: {0}", error)
-            else:
-                for track in tracks:
-                    artist = track["artist"].replace(' ', '_')
-                    title = track["title"].replace(' ', '_')
-                    name = (
-                        sub(r"[^a-zA-Z '#0-9.а-яА-Я()-]", "", track["artist"] + " - " + track["title"])[
-                        : MAX_FILENAME_LENGTH - 16
-                        ]
-#                        + ".mp3"
-                    )
-                    if ".m3u8" in track["url"]:
-                        log.warning("Файлом аудиозаписи является m3u8 плейлист.")
-                        file = name
-                        streamlink_args = ["streamlink", "--output", name.replace(".mp3", ".ts"), track["url"], "best"]
-                        ffmpeg_args = ["ffmpeg", "-i", name.replace(".mp3", ".ts"), "-b:a", "320k", name]
 
-                        result = start_process(streamlink_args)
-                        if result > 0:
-                            log.critical("При запуске команды {} произошла ошибка.", " ".join(streamlink_args))
-                            continue
+            for track in tracks:
 
-                        result = start_process(ffmpeg_args)
-                        if result > 0:
-                            log.critical("При запуске команды {} произошла ошибка", " ".join(ffmpeg_args))
-                            continue
-                    else:
-                        try:
-                            file = get_n_save(name)
-                            print(file)
-                        except (urllib.error.URLError, IndexError):
-                            log.exception("[AP] Не удалось скачать аудиозапись. Пропускаем ее...")
-                            continue
-                    track_cover = download(track["track_covers"][-1]) if track["track_covers"] else None
-                    log.debug("Adding tags in track")
-                    result = add_audio_tags(
-                        file,
-                        title=track["title"],
-                        artist=track["artist"],
-                        track_cover=track_cover,
-                    )
-                    if result:
-                        log.debug("Track {} ready for sending", name)
-                        self.tracks.append((file, track["duration"], track["artist"], track["title"], track_cover))
+                name = (sub(r"[^a-zA-Z '#0-9.а-яА-Я()-]", "", track['artist'] + '-' + track['title'])[
+                        : MAX_FILENAME_LENGTH - 16])
+
+                try:
+                    file = get_n_save(name)
+
+                except (urllib.error.URLError, IndexError):
+                    log.exception("[AP] Не удалось скачать аудиозапись. Пропускаем ее...")
+                    continue
+                log.debug("Track {} ready for sending", name)
+                self.tracks.append((file, track["artist"], track["title"]))
 
     def generate_poll(self, attachment):
         self.poll = {
@@ -194,8 +187,8 @@ class VkPostParser:
     def sign_post(self):
         button_list = []
         log.info("[AP] Подписывание поста и добавление ссылки на его оригинал.")
+        user = "https://vk.com/{0[domain]}".format(self.user)
         if self.user:
-            user = "https://vk.com/{0[domain]}".format(self.user)
             button_list.append(
                 InlineKeyboardButton("Автор поста: {first_name} {last_name}".format(**self.user), url=user)
             )

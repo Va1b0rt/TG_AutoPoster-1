@@ -1,5 +1,5 @@
 from loguru import logger as log
-from .TG_AutoPoster import AutoPoster, create_parser
+from TG_AutoPoster.TG_AutoPoster import AutoPoster, create_parser
 
 
 if __name__ == "__main__":

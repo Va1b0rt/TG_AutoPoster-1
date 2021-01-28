@@ -19,6 +19,9 @@ class Group:
             what_to_parse: set = None,
             posts_count: int = 11,
             last_story_id: int = 0,
+            add_link: bool = False,
+            del_hashtags: bool = False
+
     ):
         self.domain = domain
         self.send_reposts = send_reposts
@@ -29,6 +32,8 @@ class Group:
         self.pinned_id = pinned_id
         self.last_story_id = last_story_id
         self._vk_session = vk_session
+        self.add_link = add_link
+        self.del_hashtags = del_hashtags
 
     def get_posts(self) -> VkPostParser:
         posts = self.get_raw_posts()
@@ -39,7 +44,13 @@ class Group:
                 if post.get("marked_as_ads", 0):
                     log.info("[VK] Пост рекламный. Он будет пропущен.")
                     continue
-                parsed_post = VkPostParser(post, self.domain, self._vk_session, self.sign_posts, self.what_to_parse)
+                parsed_post = VkPostParser(post,
+                                           self.domain,
+                                           self._vk_session,
+                                           self.sign_posts,
+                                           self.what_to_parse,
+                                           self.add_link,
+                                           self.del_hashtags)
                 parsed_post.generate_post()
                 self.update_ids(is_pinned, post["id"])
                 if "copy_history" in parsed_post.raw_post:

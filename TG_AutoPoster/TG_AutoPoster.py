@@ -129,6 +129,8 @@ class AutoPoster:
             )
             last_id = self.config.getint(domain, "last_id", fallback=0)
             pinned_id = self.config.getint(domain, "pinned_id", fallback=0)
+            add_link = self.config.getboolean( domain, "add_link", fallback=0)
+            del_hashtags = self.config.getboolean( domain, "del_hashtags", fallback=0)
             send_reposts = self.config.get(domain, "send_reposts", fallback=self.config.get("global", "send_reposts", fallback=0))
             sign_posts = self.config.getboolean(
                 domain, "sign_posts", fallback=self.config.getboolean("global", "sign_posts", fallback=True)
@@ -146,7 +148,9 @@ class AutoPoster:
                 sign_posts,
                 what_to_parse,
                 posts_count,
-                last_story_id
+                last_story_id,
+                add_link,
+                del_hashtags
             )
             # Получение постов
             posts = group.get_posts()
