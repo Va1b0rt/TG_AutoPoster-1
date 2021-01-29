@@ -165,7 +165,7 @@ class AutoPoster:
                     for word in self.blacklist:
                         post.text = sub(word, "", post.text)
                     with self.bot:
-                        sender = PostSender(self.bot, post, chat_id, disable_notification, disable_web_page_preview)
+                        sender = PostSender(self.bot, post, chat_id, disable_notification, disable_web_page_preview, add_link)
                         sender.send_post()
                 self.config.set(domain, "pinned_id", str(group.pinned_id))
                 self.config.set(domain, "last_id", str(group.last_id))
