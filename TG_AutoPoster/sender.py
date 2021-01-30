@@ -8,12 +8,13 @@ from TG_AutoPoster.tools import split
 class PostSender:
     caption_link: str
 
-    def __init__(self, bot, post, chat_id, disable_notification=False, disable_web_page_preview=True, add_link = False):
+    def __init__(self, bot, post, chat_id, disable_notification=False, disable_web_page_preview=True, add_link=False):
         self.bot = bot
         self.post = post
         self.chat_id = chat_id
         self.text = split(self.post.text)
         self.fill_in_caption_link(add_link)
+        self.add_link = add_link
 
         self.disable_notification = disable_notification
         self.disable_web_page_preview = disable_web_page_preview
@@ -160,10 +161,16 @@ class PostSender:
         log.info("Отправка аудио")
         for audio, artist, title in self.post.tracks:
             log.debug("Sending audio {}", audio)
-            self.bot.send_audio(
-                self.chat_id, audio, disable_notification=self.disable_notification,
-                performer="🗣" + artist, title=title, caption=self.caption_link
-            )
+            if self.add_link:
+                self.bot.send_audio(
+                    self.chat_id, audio, disable_notification=self.disable_notification,
+                    performer="🗣" + artist, title=title, caption=self.caption_link
+                )
+            else:
+                self.bot.send_audio(
+                    self.chat_id, audio, disable_notification=self.disable_notification,
+                    performer="🗣" + artist, title=title,
+                )
 
     def send_poll(self):
         log.info("Отправка опроса")
