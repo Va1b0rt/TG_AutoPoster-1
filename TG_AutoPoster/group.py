@@ -20,7 +20,8 @@ class Group:
             posts_count: int = 11,
             last_story_id: int = 0,
             add_link: bool = False,
-            del_hashtags: bool = False
+            del_hashtags: bool = False,
+            link: str = ''
 
     ):
         self.domain = domain
@@ -34,6 +35,7 @@ class Group:
         self._vk_session = vk_session
         self.add_link = add_link
         self.del_hashtags = del_hashtags
+        self.link = link
 
     def get_posts(self) -> VkPostParser:
         posts = self.get_raw_posts()
@@ -50,7 +52,8 @@ class Group:
                                            self.sign_posts,
                                            self.what_to_parse,
                                            self.add_link,
-                                           self.del_hashtags)
+                                           self.del_hashtags, 
+                                           self.link)
                 parsed_post.generate_post()
                 self.update_ids(is_pinned, post["id"])
                 if "copy_history" in parsed_post.raw_post:

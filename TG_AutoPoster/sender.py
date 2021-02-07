@@ -8,20 +8,23 @@ from TG_AutoPoster.tools import split
 class PostSender:
     caption_link: str
 
-    def __init__(self, bot, post, chat_id, disable_notification=False, disable_web_page_preview=True, add_link=False):
+    def __init__(self, bot, post, chat_id, disable_notification=False, disable_web_page_preview=True, add_link=False, link=''):
         self.bot = bot
         self.post = post
         self.chat_id = chat_id
         self.text = split(self.post.text)
         self.fill_in_caption_link(add_link)
         self.add_link = add_link
+        self.link = link
 
         self.disable_notification = disable_notification
         self.disable_web_page_preview = disable_web_page_preview
 
     def fill_in_caption_link(self, add_link: bool) -> None:
         if add_link:
-            self.caption_link = '\n<a href="https://t.me/dbas_music_bot">🔊Музыка | Новинки </a>'
+            if self.link.len > 1:
+                lnk = self.link.split(':')
+                self.caption_link = '\n<a href="{0}">{1}</a>'.format(lnk[0], lnk[1])
         else:
             self.caption_link = ""
 

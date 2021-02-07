@@ -17,7 +17,7 @@ DOMAIN_REGEX = r"https://(m\.)?vk\.com/"
 
 
 class VkPostParser:
-    def __init__(self, post, domain, session, sign_posts=False, what_to_parse=None, add_link=False, del_hashtags=False):
+    def __init__(self, post, domain, session, sign_posts=False, what_to_parse=None, add_link=False, del_hashtags=False, link=''):
         self.session = session
         try:
             self.audio_session = VkAudio(session)
@@ -41,6 +41,7 @@ class VkPostParser:
         self.poll = None
         self.attachments_types = []
         self.what_to_parse = what_to_parse if what_to_parse else {"all"}
+        self.link = link
 
     def generate_post(self):
         log.info("[AP] Парсинг поста.")
@@ -78,12 +79,14 @@ class VkPostParser:
             if "attachments" in self.post.keys():
                 for attach in self.post['attachments']:
                     if attach['type'] == 'audio':
-                        self.text += "\n🗣" + attach['audio']['artist'] + " " + attach['audio']['title']
+                        self.text += "\n🗣" + attach['audio']['artist'] + " - " + attach['audio']['title']
                     elif attach['type'] == 'video':
                         self.text += "\n🗣" + attach['video']['title']
                 self.text += "\n"
             if self.add_link:
-                self.text += '\n<a href="https://t.me/dbas_music_bot">🔊Музыка | Новинки </a>'
+                if self.link.len > 1:
+                    lnk = self.link.split(':')
+                    self.text += '\n<a href="{0}">{1}</a>'.format(lnk[0], lnk[1])
             if self.del_hashtags:
                 self.text = sub(r'(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)', "", self.text)
 

@@ -131,6 +131,7 @@ class AutoPoster:
             pinned_id = self.config.getint(domain, "pinned_id", fallback=0)
             add_link = self.config.getboolean( domain, "add_link", fallback=0)
             del_hashtags = self.config.getboolean( domain, "del_hashtags", fallback=0)
+            link = self.config.get(domain, "link", fallback=0)
             send_reposts = self.config.get(domain, "send_reposts", fallback=self.config.get("global", "send_reposts", fallback=0))
             sign_posts = self.config.getboolean(
                 domain, "sign_posts", fallback=self.config.getboolean("global", "sign_posts", fallback=True)
@@ -150,7 +151,8 @@ class AutoPoster:
                 posts_count,
                 last_story_id,
                 add_link,
-                del_hashtags
+                del_hashtags,
+                link
             )
             # Получение постов
             posts = group.get_posts()
@@ -165,7 +167,7 @@ class AutoPoster:
                     for word in self.blacklist:
                         post.text = sub(word, "", post.text)
                     with self.bot:
-                        sender = PostSender(self.bot, post, chat_id, disable_notification, disable_web_page_preview, add_link)
+                        sender = PostSender(self.bot, post, chat_id, disable_notification, disable_web_page_preview, add_link, link)
                         sender.send_post()
                 self.config.set(domain, "pinned_id", str(group.pinned_id))
                 self.config.set(domain, "last_id", str(group.last_id))
