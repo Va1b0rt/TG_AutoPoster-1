@@ -131,7 +131,10 @@ class AutoPoster:
             pinned_id = self.config.getint(domain, "pinned_id", fallback=0)
             add_link = self.config.getboolean( domain, "add_link", fallback=0)
             del_hashtags = self.config.getboolean( domain, "del_hashtags", fallback=0)
-            link = self.config.get(domain, "link", fallback=0)
+            
+            link = {'link': str(self.config.get(domain, "link", fallback=0)),
+                    'name': str(self.config.get(domain, "link_name", fallback=0))}            
+            
             send_reposts = self.config.get(domain, "send_reposts", fallback=self.config.get("global", "send_reposts", fallback=0))
             sign_posts = self.config.getboolean(
                 domain, "sign_posts", fallback=self.config.getboolean("global", "sign_posts", fallback=True)
@@ -183,6 +186,8 @@ class AutoPoster:
                             self.config.get(domain, "channel"),
                             disable_notification,
                             disable_web_page_preview,
+                            add_link,
+                            link
                         )
                         sender.send_post()
                         self.config.set(domain, "last_story_id", str(group.last_story_id))

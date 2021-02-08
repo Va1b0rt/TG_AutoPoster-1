@@ -7,24 +7,26 @@ from TG_AutoPoster.tools import split
 
 class PostSender:
     caption_link: str
+    link: str
 
     def __init__(self, bot, post, chat_id, disable_notification=False, disable_web_page_preview=True, add_link=False, link=''):
         self.bot = bot
         self.post = post
         self.chat_id = chat_id
         self.text = split(self.post.text)
-        self.fill_in_caption_link(add_link)
         self.add_link = add_link
         self.link = link
+        self.caption_link = ''
+        self.fill_in_caption_link(add_link, link)
+
 
         self.disable_notification = disable_notification
         self.disable_web_page_preview = disable_web_page_preview
 
-    def fill_in_caption_link(self, add_link: bool) -> None:
+    def fill_in_caption_link(self, add_link: bool, link: str) -> None:
         if add_link:
-            if self.link.len > 1:
-                lnk = self.link.split(':')
-                self.caption_link = '\n<a href="{0}">{1}</a>'.format(lnk[0], lnk[1])
+            if len(link['link']) > 1:
+                self.caption_link += '\n<a href="{0}">{1}</a>'.format(link['link'], link['name'])
         else:
             self.caption_link = ""
 

@@ -84,11 +84,10 @@ class VkPostParser:
                         self.text += "\n🗣" + attach['video']['title']
                 self.text += "\n"
             if self.add_link:
-                if self.link.len > 1:
-                    lnk = self.link.split(':')
-                    self.text += '\n<a href="{0}">{1}</a>'.format(lnk[0], lnk[1])
+                if len(self.link['link']) > 1:
+                    self.text += '\n<a href="{0}">{1}</a>'.format(self.link['link'], self.link['name'])
             if self.del_hashtags:
-                self.text = sub(r'(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)', "", self.text)
+                self.text = sub(r'(?:(?<=\s)|^)@(\w*[A-Za-z_]+\w*)', "", sub(r'(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)', "", self.text))
 
     def generate_link(self, attachment):
         log.info("[AP] Парсинг ссылки...")
