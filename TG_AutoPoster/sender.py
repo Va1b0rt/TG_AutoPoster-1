@@ -19,7 +19,6 @@ class PostSender:
         self.caption_link = ''
         self.fill_in_caption_link(add_link, link)
 
-
         self.disable_notification = disable_notification
         self.disable_web_page_preview = disable_web_page_preview
 

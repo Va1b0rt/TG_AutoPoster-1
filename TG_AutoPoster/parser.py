@@ -10,14 +10,15 @@ from vk_api.audio import VkAudio
 from wget import download
 
 from TG_AutoPoster.tools import add_audio_tags, build_menu, start_process
-from TG_AutoPoster.downloader import get_n_save
+from TG_AutoPoster.downloader import get_n_save, get_video
 
 MAX_FILENAME_LENGTH = 255
 DOMAIN_REGEX = r"https://(m\.)?vk\.com/"
 
 
 class VkPostParser:
-    def __init__(self, post, domain, session, sign_posts=False, what_to_parse=None, add_link=False, del_hashtags=False, link=''):
+    def __init__(self, post, domain, session, sign_posts=False, what_to_parse=None, add_link=False, del_hashtags=False,
+                 link=''):
         self.session = session
         try:
             self.audio_session = VkAudio(session)
@@ -49,7 +50,7 @@ class VkPostParser:
             self.generate_text()
 
         if "attachments" in self.raw_post:
-            self.attachments_types = tuple(x["type"] for x in self.raw_post["attachments"])
+            self.attachments_types = (x["type"] for x in self.raw_post["attachments"])
             for attachment in self.raw_post["attachments"]:
                 if attachment["type"] in ["link", "page", "album"] and self.what_to_parse.intersection({"link", "all"}):
                     self.generate_link(attachment)
@@ -87,7 +88,8 @@ class VkPostParser:
                 if len(self.link['link']) > 1:
                     self.text += '\n<a href="{0}">{1}</a>'.format(self.link['link'], self.link['name'])
             if self.del_hashtags:
-                self.text = sub(r'(?:(?<=\s)|^)@(\w*[A-Za-z_]+\w*)', "", sub(r'(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)', "", self.text))
+                self.text = sub(r'(?:(?<=\s)|^)@(\w*[A-Za-z_]+\w*)', "",
+                                sub(r'(?:(?<=\s)|^)#(\w*[A-Za-z_]+\w*)', "", self.text))
 
     def generate_link(self, attachment):
         log.info("[AP] Парсинг ссылки...")
@@ -131,8 +133,10 @@ class VkPostParser:
         if not attachment["video"].get("platform"):
             soup = BeautifulSoup(self.session.http.get(video_link).text, "html.parser")
             if len(soup.find_all("source")) >= 2:
-                video_link = soup.find_all("source")[1].get("src")
-                file = download(video_link)
+                #video_link = soup.find_all("source")[1].get("src")
+                #file = download(video_link)
+                file = get_video(video_link, attachment["video"]['owner_id'] + attachment["video"]['id'])
+
                 if getsize(file) >= 2097152000:
                     log.info("[AP] Видео весит более 2 ГБ. Добавляем ссылку на видео в текст.")
                     self.text += '\n🎥 <a href="{0}">{1[title]}</a>\n👁 {1[views]} раз(а) ⏳ {1[duration]} сек'.format(
@@ -146,7 +150,8 @@ class VkPostParser:
                 video_link.replace("m.", ""), attachment["video"]
             )
 
-    def get_tracks(self, post):
+    @staticmethod
+    def get_tracks(post):
         tracks = []
         for attach in post['attachments']:
             if attach['type'] == 'audio':

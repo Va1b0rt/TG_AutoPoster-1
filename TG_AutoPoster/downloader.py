@@ -1,10 +1,21 @@
 import requests
 import time
 import os
+import youtube_dl
+
 
 headers = {
     'user-agent':
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36"}
+
+
+def get_video(link, name):
+    ydl_opts = {'outtmpl': f'{name}.mp4'}
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+
+        ydl.download([link])
+    return ydl_opts['outtmpl']
 
 
 def get_n_save(song_name="Rammstein"):
@@ -41,5 +52,3 @@ def save_song(link, file_name):
             return False
     except:
         return False
-
-    return
