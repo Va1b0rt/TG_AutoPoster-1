@@ -22,7 +22,7 @@ if os.name != "nt":
     CACHE_DIR = Path(TEMP_DIR.name)
 else:
     CACHE_DIR = Path.cwd() / ".cache"
-    CONFIG_PATH = Path.cwd() / "config.ini"
+CONFIG_PATH = Path.cwd() / "config.ini"
 
 
 def create_parser():
