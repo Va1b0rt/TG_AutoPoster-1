@@ -2,6 +2,8 @@ import requests
 import time
 import os
 import youtube_dl
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 headers = {

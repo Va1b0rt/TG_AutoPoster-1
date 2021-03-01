@@ -164,6 +164,7 @@ class AutoPoster:
             posts = group.get_posts()
             for post in posts:
                 if post.post['id'] in posts_id:
+                    log.info(f'Пост {post.post["id"]} будет проигнорирован')
                     return
                 skip_post = False
                 for word in self.stop_list:
@@ -172,8 +173,10 @@ class AutoPoster:
                         log.info("Пост содержит стоп-слово, поэтому он не будет отправлен.")
                 # Отправка постов
                 if not skip_post:
+                    log.info(f'Пост {post.post["id"]} будет отправлен в канал')
                     for word in self.blacklist:
                         post.text = sub(word, "", post.text)
+
                     with self.bot:
                         sender = PostSender(self.bot, post, chat_id, disable_notification,
                                             disable_web_page_preview, add_link, link)
@@ -216,18 +219,18 @@ class AutoPoster:
         elif len(posts_id) == 1:
             self.config.set(domain, "posts_ids", str(posts_id[0]))
         elif len(posts_id) > 20:
-            unnecessary_posts = len(posts_id) - 20
-            i = 0
+            i = len(posts_id) - 20
             list_id = []
             for postid in posts_id:
-                if i < unnecessary_posts:
-                    i = i + 1
-                    continue
+                i = i + 1
+                if i >= 20:
+                    break
                 else:
-                    list_id.append(id)
+                    list_id.append(postid)
             self.config.set(domain, "posts_ids", ':'.join(map(str, list_id)))
         else:
             self.config.set(domain, "posts_ids", ':'.join(map(str, posts_id)))
+        self._save_config()
 
     def infinity_run(self, interval=3600):
         while True:
