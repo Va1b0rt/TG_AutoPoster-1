@@ -219,15 +219,10 @@ class AutoPoster:
         elif len(posts_id) == 1:
             self.config.set(domain, "posts_ids", str(posts_id[0]))
         elif len(posts_id) > 20:
-            i = len(posts_id) - 20
-            list_id = []
-            for postid in posts_id:
-                i = i + 1
-                if i >= len(posts_id):
-                    break
-                else:
-                    list_id.append(postid)
-            self.config.set(domain, "posts_ids", ':'.join(map(str, list_id)))
+            iter = len(posts_id) - 20
+            for i in range(iter):
+                del posts_id[i]
+            self.config.set(domain, "posts_ids", ':'.join(map(str, posts_id)))
         else:
             self.config.set(domain, "posts_ids", ':'.join(map(str, posts_id)))
         self._save_config()
