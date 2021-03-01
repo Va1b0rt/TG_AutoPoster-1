@@ -223,7 +223,7 @@ class AutoPoster:
             list_id = []
             for postid in posts_id:
                 i = i + 1
-                if i >= 20:
+                if i >= len(posts_id):
                     break
                 else:
                     list_id.append(postid)
