@@ -183,7 +183,7 @@ class AutoPoster:
                         sender.send_post()
                 self.config.set(domain, "pinned_id", str(group.pinned_id))
                 self.config.set(domain, "last_id", str(group.last_id))
-                posts_id.append(post.post['id'])
+                posts_id.append(str(group.last_id))
                 self.set_posts_id(domain, posts_id)
                 self._save_config()
             if send_stories:
