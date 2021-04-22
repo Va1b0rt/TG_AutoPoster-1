@@ -165,7 +165,7 @@ class AutoPoster:
             for post in posts:
                 if post.post['id'] in posts_id:
                     log.info(f'Пост {post.post["id"]} будет проигнорирован')
-                    return
+                    continue
                 skip_post = False
                 for word in self.stop_list:
                     if word.lower() in post.text.lower():
