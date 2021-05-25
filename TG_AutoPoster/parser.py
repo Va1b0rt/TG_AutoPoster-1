@@ -43,6 +43,7 @@ class VkPostParser:
         self.attachments_types = []
         self.what_to_parse = what_to_parse if what_to_parse else {"all"}
         self.link = link
+        self.ifVideo : bool = False
 
     def generate_post(self):
         log.info("[AP] Парсинг поста.")
@@ -128,6 +129,7 @@ class VkPostParser:
             self.text += '\n📃 <a href="{url}">{title}</a>'.format(**attachment["doc"])
 
     def generate_video(self, attachment):
+        self.ifVideo = True
         log.info("[AP] Извлечение видео...")
         video_link = "https://m.vk.com/video{owner_id}_{id}".format(**attachment["video"])
         if not attachment["video"].get("platform"):

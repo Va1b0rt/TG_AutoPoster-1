@@ -55,6 +55,11 @@ class Group:
                                            self.del_hashtags, 
                                            self.link)
                 parsed_post.generate_post()
+
+                if parsed_post.ifVideo:
+                    log.info("В посте содержится видео. Пропускаем.")
+                    continue
+
                 self.update_ids(is_pinned, post["id"])
                 if "copy_history" in parsed_post.raw_post:
                     log.info("В посте содержится репост.")

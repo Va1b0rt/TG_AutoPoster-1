@@ -12,10 +12,10 @@ headers = {
 
 
 def get_video(link, name):
-    ydl_opts = {'outtmpl': f'{name}.mp4'}
+    ydl_opts = {'outtmpl': f'{name}.mp4',
+                'format': 'bestaudio/low'}
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-
         ydl.download([link])
     return ydl_opts['outtmpl']
 
